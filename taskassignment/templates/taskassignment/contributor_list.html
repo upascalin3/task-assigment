@@ -1,0 +1,162 @@
+{% extends 'taskassignment/base.html' %}
+
+{% block title %}Contributors - TMA{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div class="mb-4 lg:mb-0">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">
+                <i class="bi bi-people mr-2"></i>Contributors
+            </h2>
+            <p class="text-gray-600">Manage team members and their tasks</p>
+        </div>
+        <a href="{% url 'taskassignment:contributor_create' %}" class="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors">
+            <i class="bi bi-person-plus mr-2"></i>Add Contributor
+        </a>
+    </div>
+</div>
+
+<!-- Page Size Selector -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
+    <div class="p-6">
+        <form method="get" class="flex items-center space-x-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Items per page</label>
+                <select name="page_size" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" onchange="this.form.submit()">
+                    {% for size in page_sizes %}
+                        <option value="{{ size }}" {% if page_size == size %}selected{% endif %}>{{ size }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm border border-gray-200">
+    <div class="p-0">
+        {% if contributors %}
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contributor</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for contributor in contributors %}
+                    <tr class="hover:bg-gray-50 cursor-pointer" data-url="{% url 'taskassignment:contributor_detail' contributor.id %}" onclick="window.location.href=this.dataset.url">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center mr-3">
+                                    {{ contributor.name|first|upper }}
+                                </div>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900">
+                                        {{ contributor.name }}
+                                    </div>
+                                    <div class="text-xs text-gray-500">Team Member</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center text-sm text-gray-900">
+                                <i class="bi bi-envelope mr-2 text-gray-400"></i>
+                                {{ contributor.email }}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <div class="flex justify-end space-x-2" onclick="event.stopPropagation()">
+                                <a href="{% url 'taskassignment:contributor_update' contributor.id %}" class="text-gray-600 hover:text-black p-1 rounded">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'taskassignment:contributor_delete' contributor.id %}" class="text-red-600 hover:text-red-800 p-1 rounded">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+            <i class="bi bi-person-plus text-6xl text-gray-400"></i>
+            <h5 class="text-lg font-medium text-gray-900 mt-4">No contributors found</h5>
+            <p class="text-gray-500 mt-2">Get started by adding your first team member.</p>
+            <a href="{% url 'taskassignment:contributor_create' %}" class="inline-flex items-center bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors mt-4">
+                <i class="bi bi-person-plus mr-2"></i>Add Contributor
+            </a>
+        </div>
+        {% endif %}
+        
+        <!-- Pagination - Below Table -->
+        {% if contributors.has_other_pages %}
+        <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+            <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+                <!-- Page Info -->
+                <div class="text-sm text-gray-700">
+                    <span class="font-medium">{{ contributors.start_index }}-{{ contributors.end_index }}</span> of <span class="font-medium">{{ contributors.paginator.count }}</span> results
+                </div>
+                
+                <!-- Pagination Controls -->
+                <div class="flex items-center space-x-1">
+                    <!-- Previous Page -->
+                    {% if contributors.has_previous %}
+                        <a href="?page={{ contributors.previous_page_number }}&page_size={{ page_size }}" 
+                           class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors">
+                            <i class="bi bi-chevron-left mr-1"></i>
+                            <span>Previous</span>
+                        </a>
+                    {% else %}
+                        <span class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-300 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed">
+                            <i class="bi bi-chevron-left mr-1"></i>
+                            <span>Previous</span>
+                        </span>
+                    {% endif %}
+                    
+                    <!-- Page Numbers -->
+                    <div class="flex items-center space-x-1">
+                        {% for num in contributors.paginator.page_range %}
+                            {% if contributors.number == num %}
+                                <span class="px-3 py-2 text-sm font-medium text-white bg-primary rounded-lg">{{ num }}</span>
+                            {% elif num > contributors.number|add:'-3' and num < contributors.number|add:'3' %}
+                                <a href="?page={{ num }}&page_size={{ page_size }}" 
+                                   class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors">
+                                    {{ num }}
+                                </a>
+                            {% elif num == 1 or num == contributors.paginator.num_pages %}
+                                <a href="?page={{ num }}&page_size={{ page_size }}" 
+                                   class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors">
+                                    {{ num }}
+                                </a>
+                            {% elif num == contributors.number|add:'-4' or num == contributors.number|add:'4' %}
+                                <span class="px-3 py-2 text-sm font-medium text-gray-400">...</span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Next Page -->
+                    {% if contributors.has_next %}
+                        <a href="?page={{ contributors.next_page_number }}&page_size={{ page_size }}" 
+                           class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors">
+                            <span>Next</span>
+                            <i class="bi bi-chevron-right ml-1"></i>
+                        </a>
+                    {% else %}
+                        <span class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-300 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed">
+                            <span>Next</span>
+                            <i class="bi bi-chevron-right ml-1"></i>
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

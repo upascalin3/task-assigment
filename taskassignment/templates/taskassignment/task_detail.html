@@ -1,0 +1,195 @@
+{% extends 'taskassignment/base.html' %}
+
+{% block title %}Task - {{ task.title }}{% endblock %}
+
+{% block content %}
+<!-- Back Button -->
+<div class="mb-4">
+    <a href="{% url 'taskassignment:task_list' %}" class="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors">
+        <i class="bi bi-arrow-left mr-2"></i>
+        <span class="font-medium">Back to Tasks</span>
+    </a>
+</div>
+
+<div class="mb-8">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div class="mb-4 lg:mb-0">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ task.title }}</h1>
+            <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-6 space-y-2 sm:space-y-0 text-sm text-gray-600">
+                <div class="flex items-center">
+                    <i class="bi bi-person mr-2"></i>
+                    <span><strong>Assignee:</strong> <a href="{% url 'taskassignment:contributor_detail' task.contributor.id %}" class="text-primary hover:text-primary-dark">{{ task.contributor.name }}</a></span>
+                </div>
+                <div class="flex items-center">
+                    <i class="bi bi-calendar-event mr-2"></i>
+                    <span><strong>Start:</strong> {{ task.start|date:'M d, Y H:i' }}</span>
+                </div>
+                <div class="flex items-center">
+                    <i class="bi bi-calendar-check mr-2"></i>
+                    <span><strong>End:</strong> {{ task.end_date|date:'M d, Y' }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="flex space-x-3">
+            <a href="{% url 'taskassignment:task_update' task.id %}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                <i class="bi bi-pencil mr-2"></i>Edit
+            </a>
+            <a href="{% url 'taskassignment:task_delete' task.id %}" class="px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors">
+                <i class="bi bi-trash mr-2"></i>Delete
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+        <!-- Task Details Card -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">Task Details</h3>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">Status</h4>
+                        {% if task.is_completed %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                <i class="bi bi-check-circle mr-2"></i>Completed
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                <i class="bi bi-clock mr-2"></i>Pending
+                            </span>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">Assignee</h4>
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center mr-3 text-sm font-medium">
+                                {{ task.contributor.name|first|upper }}
+                            </div>
+                            <div>
+                                <a href="{% url 'taskassignment:contributor_detail' task.contributor.id %}" class="text-sm font-medium text-gray-900 hover:text-primary">
+                                    {{ task.contributor.name }}
+                                </a>
+                                <p class="text-xs text-gray-500">{{ task.contributor.email }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <h4 class="text-sm font-medium text-gray-700 mb-2">Description</h4>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <p class="text-gray-900 whitespace-pre-wrap">{{ task.description }}</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">Start Date & Time</h4>
+                        <div class="flex items-center text-gray-900">
+                            <i class="bi bi-calendar-event mr-2 text-gray-400"></i>
+                            {{ task.start|date:'F d, Y \a\t H:i' }}
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">End Date</h4>
+                        <div class="flex items-center text-gray-900">
+                            <i class="bi bi-calendar-check mr-2 text-gray-400"></i>
+                            {{ task.end_date|date:'F d, Y' }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Task Progress Card -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">Task Progress</h3>
+            </div>
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-sm font-medium text-gray-700">Completion Status</span>
+                    <span class="text-sm font-medium text-gray-900">
+                        {% if task.is_completed %}100%{% else %}0%{% endif %}
+                    </span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    {% if task.is_completed %}
+                    <div class="bg-primary h-2 rounded-full transition-all duration-300" style="width: 100%"></div>
+                    {% else %}
+                    <div class="bg-primary h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    {% endif %}
+                </div>
+                <div class="flex justify-between mt-2 text-xs text-gray-500">
+                    <span>Started: {{ task.start|date:'M d' }}</span>
+                    <span>Due: {{ task.end_date|date:'M d' }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="lg:col-span-1 space-y-6">
+        <!-- Quick Actions Card -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">Quick Actions</h3>
+            </div>
+            <div class="p-6 space-y-4">
+                <form action="{% url 'taskassignment:task_toggle_complete' task.id %}" method="post">
+                    {% csrf_token %}
+                    <button class="w-full {% if task.is_completed %}bg-yellow-100 text-yellow-800 hover:bg-yellow-200{% else %}bg-green-100 text-green-800 hover:bg-green-200{% endif %} px-4 py-2 rounded-lg transition-colors flex items-center justify-center" type="submit">
+                        {% if task.is_completed %}
+                            <i class="bi bi-clock mr-2"></i>Mark as Pending
+                        {% else %}
+                            <i class="bi bi-check-circle mr-2"></i>Mark as Completed
+                        {% endif %}
+                    </button>
+                </form>
+                
+                <div class="border-t border-gray-200 pt-4">
+                    <a href="{% url 'taskassignment:task_update' task.id %}" class="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 px-4 py-2 rounded-lg transition-colors flex items-center justify-center mb-2">
+                        <i class="bi bi-pencil mr-2"></i>Edit Task
+                    </a>
+                    <a href="{% url 'taskassignment:task_delete' task.id %}" class="w-full bg-red-100 text-red-700 hover:bg-red-200 px-4 py-2 rounded-lg transition-colors flex items-center justify-center">
+                        <i class="bi bi-trash mr-2"></i>Delete Task
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Task Info Card -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">Task Information</h3>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <h4 class="text-sm font-medium text-gray-700 mb-1">Created</h4>
+                    <p class="text-sm text-gray-900">{{ task.start|date:'M d, Y' }}</p>
+                </div>
+                <div>
+                    <h4 class="text-sm font-medium text-gray-700 mb-1">Duration</h4>
+                    <p class="text-sm text-gray-900">
+                        {% now "Y-m-d" as today %}
+                        {% if task.end_date|date:"Y-m-d" >= today %}
+                            {{ task.start|timesince:task.end_date }} remaining
+                        {% else %}
+                            Overdue by {{ task.end_date|timesince:today }}
+                        {% endif %}
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-sm font-medium text-gray-700 mb-1">Priority</h4>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <i class="bi bi-flag mr-1"></i>Normal
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

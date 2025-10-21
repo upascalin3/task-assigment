@@ -1,0 +1,186 @@
+{% extends 'taskassignment/base.html' %}
+
+{% block title %}{{ title }} - Task{% endblock %}
+
+{% block content %}
+<!-- Back Button -->
+<div class="mb-4">
+    {% if task %}
+        <a href="{% url 'taskassignment:task_detail' task.id %}" class="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors">
+            <i class="bi bi-arrow-left mr-2"></i>
+            <span class="font-medium">Back to Task</span>
+        </a>
+    {% else %}
+        <a href="{% url 'taskassignment:task_list' %}" class="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors">
+            <i class="bi bi-arrow-left mr-2"></i>
+            <span class="font-medium">Back to Tasks</span>
+        </a>
+    {% endif %}
+</div>
+
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900">{{ title }}</h2>
+        </div>
+        <div class="p-6">
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="bi bi-card-text mr-1"></i>{{ form.title.label }}
+                        </label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.title.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="bi bi-person-check mr-1"></i>{{ form.contributor.label }}
+                        </label>
+                        <div class="relative">
+                            {{ form.contributor }}
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <i class="bi bi-chevron-down text-gray-400"></i>
+                            </div>
+                        </div>
+                        {% if form.contributor.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.contributor.errors|striptags }}</div>
+                        {% endif %}
+                        <div class="mt-2 p-3 bg-gray-50 rounded-lg">
+                            <p class="text-xs text-gray-600 mb-1">💡 <strong>Tip:</strong> Select the team member who will work on this task</p>
+                            <p class="text-xs text-gray-500">Contributors will be notified about their assigned tasks</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="bi bi-file-text mr-1"></i>{{ form.description.label }}
+                    </label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.description.errors|striptags }}</div>
+                    {% endif %}
+                    <p class="text-xs text-gray-500 mt-1">Provide detailed information about what needs to be done</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="bi bi-calendar-event mr-1"></i>{{ form.start.label }}
+                        </label>
+                        {{ form.start }}
+                        {% if form.start.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.start.errors|striptags }}</div>
+                        {% endif %}
+                        <div class="mt-2 p-3 bg-blue-50 rounded-lg">
+                            <p class="text-xs text-blue-600 mb-1">⏰ <strong>Start Date & Time:</strong> When should this task begin?</p>
+                            <p class="text-xs text-blue-500">Must be in the future - cannot start in the past</p>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="bi bi-calendar-check mr-1"></i>{{ form.end_date.label }}
+                        </label>
+                        {{ form.end_date }}
+                        {% if form.end_date.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.end_date.errors|striptags }}</div>
+                        {% endif %}
+                        <div class="mt-2 p-3 bg-green-50 rounded-lg">
+                            <p class="text-xs text-green-600 mb-1">📅 <strong>End Date:</strong> When should this task be completed?</p>
+                            <p class="text-xs text-green-500">Must be after the start date</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        {{ form.is_completed }}
+                        <label class="ml-3 text-sm font-medium text-gray-700">{{ form.is_completed.label }}</label>
+                    </div>
+                    {% if form.is_completed.errors %}
+                        <div class="text-red-600 text-sm mt-1 ml-4">{{ form.is_completed.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                    <a href="{% url 'taskassignment:task_list' %}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                        Cancel
+                    </a>
+                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
+                        Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const startInput = document.querySelector('input[name="start"]');
+    const endInput = document.querySelector('input[name="end_date"]');
+    
+    // Set minimum date for start input to current date/time
+    if (startInput) {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        
+        startInput.min = `${year}-${month}-${day}T${hours}:${minutes}`;
+        
+        // Update end date minimum when start date changes
+        startInput.addEventListener('change', function() {
+            if (endInput && this.value) {
+                const startDate = new Date(this.value);
+                const nextDay = new Date(startDate);
+                nextDay.setDate(startDate.getDate() + 1);
+                
+                const year = nextDay.getFullYear();
+                const month = String(nextDay.getMonth() + 1).padStart(2, '0');
+                const day = String(nextDay.getDate()).padStart(2, '0');
+                
+                endInput.min = `${year}-${month}-${day}`;
+            }
+        });
+    }
+    
+    // Set minimum date for end input to tomorrow
+    if (endInput) {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const year = tomorrow.getFullYear();
+        const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+        const day = String(tomorrow.getDate()).padStart(2, '0');
+        
+        endInput.min = `${year}-${month}-${day}`;
+    }
+    
+    // Real-time validation
+    function validateDates() {
+        if (startInput && endInput && startInput.value && endInput.value) {
+            const startDate = new Date(startInput.value);
+            const endDate = new Date(endInput.value);
+            
+            if (endDate <= startDate) {
+                endInput.setCustomValidity('End date must be after start date');
+            } else {
+                endInput.setCustomValidity('');
+            }
+        }
+    }
+    
+    if (startInput) startInput.addEventListener('change', validateDates);
+    if (endInput) endInput.addEventListener('change', validateDates);
+});
+</script>
+{% endblock %}
+

@@ -1,0 +1,203 @@
+{% extends 'taskassignment/base.html' %}
+
+{% block title %}Dashboard - TMA{% endblock %}
+
+{% block content %}
+<!-- Welcome Section -->
+<div class="mb-8">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div class="mb-4 lg:mb-0">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Welcome to TMA</h1>
+            <p class="text-gray-600">Task Management Application - Manage your team and tasks efficiently.</p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+            <a href="{% url 'taskassignment:task_create' %}" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
+                <i class="bi bi-plus-circle mr-2"></i>New Task
+            </a>
+            <a href="{% url 'taskassignment:contributor_create' %}" class="px-4 py-2 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors">
+                <i class="bi bi-person-plus mr-2"></i>Add Contributor
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+        <div class="flex justify-between items-start">
+            <div>
+                <div class="text-4xl font-bold mb-2 text-gray-900">{{ total_tasks }}</div>
+                <div class="text-sm text-gray-600 uppercase tracking-wide">Total Tasks</div>
+            </div>
+            <i class="bi bi-list-task text-4xl text-gray-400"></i>
+        </div>
+    </div>
+    
+    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+        <div class="flex justify-between items-start">
+            <div>
+                <div class="text-4xl font-bold mb-2 text-green-600">{{ completed_tasks }}</div>
+                <div class="text-sm text-gray-600 uppercase tracking-wide">Completed</div>
+            </div>
+            <i class="bi bi-check-circle text-4xl text-green-400"></i>
+        </div>
+    </div>
+    
+    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+        <div class="flex justify-between items-start">
+            <div>
+                <div class="text-4xl font-bold mb-2 text-yellow-600">{{ pending_tasks }}</div>
+                <div class="text-sm text-gray-600 uppercase tracking-wide">Pending</div>
+            </div>
+            <i class="bi bi-clock text-4xl text-yellow-400"></i>
+        </div>
+    </div>
+    
+    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+        <div class="flex justify-between items-start">
+            <div>
+                <div class="text-4xl font-bold mb-2 text-gray-900">{{ total_contributors }}</div>
+                <div class="text-sm text-gray-600 uppercase tracking-wide">Contributors</div>
+            </div>
+            <i class="bi bi-people text-4xl text-gray-400"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <!-- Recent Tasks -->
+    <div class="lg:col-span-2">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h5 class="text-lg font-semibold text-gray-900">Recent Tasks</h5>
+                <a href="{% url 'taskassignment:task_list' %}" class="text-black hover:text-gray-700 font-medium">
+                    See Details
+                </a>
+            </div>
+            <div class="p-0">
+                {% if recent_tasks %}
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assignee</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for task in recent_tasks %}
+                            <tr class="hover:bg-gray-50 cursor-pointer" data-url="{% url 'taskassignment:task_detail' task.id %}" onclick="window.location.href=this.dataset.url">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">
+                                        {{ task.title|truncatechars:30 }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="w-6 h-6 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center mr-2 text-xs font-medium">
+                                            {{ task.contributor.name|first|upper }}
+                                        </div>
+                                        <div class="text-sm text-gray-900">{{ task.contributor.name }}</div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ task.start|date:'M d, Y' }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {% if task.is_completed %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            <i class="bi bi-check-circle mr-1"></i>Completed
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            <i class="bi bi-clock mr-1"></i>Pending
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-12">
+                    <i class="bi bi-inbox text-6xl text-gray-400"></i>
+                    <p class="text-gray-500 mt-4">No recent tasks</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Team Overview -->
+    <div class="lg:col-span-1">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h5 class="text-lg font-semibold text-gray-900">Team Overview</h5>
+            </div>
+            <div class="p-0">
+                {% if tasks_by_contributor %}
+                <div class="divide-y divide-gray-200">
+                    {% for entry in tasks_by_contributor %}
+                    <div class="px-6 py-4 flex justify-between items-center cursor-pointer hover:bg-gray-50" data-url="{% url 'taskassignment:contributor_detail' entry.contributor.id %}" onclick="window.location.href=this.dataset.url">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center mr-3">
+                                {{ entry.contributor.name|first|upper }}
+                            </div>
+                            <div>
+                                <div class="text-sm font-medium text-gray-900">
+                                    {{ entry.contributor.name }}
+                                </div>
+                                <p class="text-xs text-gray-500">{{ entry.contributor.email }}</p>
+                            </div>
+                        </div>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                            {{ entry.task_count }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-12">
+                    <i class="bi bi-person-plus text-6xl text-gray-400"></i>
+                    <p class="text-gray-500 mt-4">No contributors yet</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-200">
+    <div class="px-6 py-4 border-b border-gray-200">
+        <h5 class="text-lg font-semibold text-gray-900">Quick Actions</h5>
+    </div>
+    <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <a href="{% url 'taskassignment:task_create' %}" class="flex flex-col items-center p-6 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors">
+                <i class="bi bi-plus-circle text-2xl mb-2"></i>
+                <span class="font-medium">Create Task</span>
+                <span class="text-xs text-gray-600 mt-1">Add new task</span>
+            </a>
+            <a href="{% url 'taskassignment:contributor_create' %}" class="flex flex-col items-center p-6 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                <i class="bi bi-person-plus text-2xl mb-2"></i>
+                <span class="font-medium">Add Contributor</span>
+                <span class="text-xs text-gray-600 mt-1">New team member</span>
+            </a>
+            <a href="{% url 'taskassignment:task_list' %}" class="flex flex-col items-center p-6 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                <i class="bi bi-list-task text-2xl mb-2"></i>
+                <span class="font-medium">View Tasks</span>
+                <span class="text-xs text-gray-600 mt-1">All tasks</span>
+            </a>
+            <a href="{% url 'taskassignment:contributor_list' %}" class="flex flex-col items-center p-6 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                <i class="bi bi-people text-2xl mb-2"></i>
+                <span class="font-medium">View Contributors</span>
+                <span class="text-xs text-gray-600 mt-1">Team members</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
