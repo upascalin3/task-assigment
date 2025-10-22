@@ -84,3 +84,25 @@ class TaskForm(forms.ModelForm):
                 raise ValidationError('End date must be after the start date.')
         
         return cleaned_data
+
+class AttendanceForm(forms.ModelForm):
+    class Meta:
+        model = Attendance
+        fields = ['contributor', 'date', 'is_available']
+        widgets = {
+            'contributor': forms.Select(attrs={
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary'
+            }),
+            'date': forms.DateInput(attrs={
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary',
+                'type': 'date'
+            }),
+            'is_available': forms.CheckboxInput(attrs={
+                'class': 'h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded'
+            })
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.instance or not self.instance.pk:
+            self.fields['date'].initial = date.today()

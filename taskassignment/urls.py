@@ -21,4 +21,8 @@ urlpatterns = [
     path('tasks/<int:pk>/update/', views.task_update, name='task_update'),
     path('tasks/<int:pk>/delete/', views.task_delete, name='task_delete'),
     path('tasks/<int:pk>/toggle/', views.task_toggle_complete, name='task_toggle_complete'),
+
+    # Attendance URLs (only list and take)
+    path('attendance/', views.attendance_list, name='attendance_list'),
+    path('attendance/take/', views.attendance_take, name='attendance_take'),
 ]

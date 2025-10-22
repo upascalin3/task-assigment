@@ -4,10 +4,16 @@ from django.http import JsonResponse
 from django.core.paginator import Paginator
 from taskassignment.models import *
 from taskassignment.forms import *
+from django.utils.dateparse import parse_date
+from datetime import date as dt_date
 
 # Create your views here.
 
 # ==================== CONTRIBUTOR VIEWS ====================
+
+def contributor_Json_list(request):
+    contributors_list = Contributor.objects.all().values('id', 'name', 'email')
+    return JsonResponse(list(contributors_list), safe=False)
 
 def contributor_list(request):
     """List all contributors with pagination"""
@@ -212,3 +218,64 @@ def dashboard(request):
     }
     
     return render(request, 'taskassignment/dashboard.html', context)
+
+# ==================== ATTENDANCE VIEWS ====================
+
+def attendance_list(request):
+    """Simple list of all attendance records with no filters/pagination"""
+    attendance = Attendance.objects.select_related('contributor').order_by('-date', 'contributor__name')
+    return render(request, 'taskassignment/attendance_list.html', {
+        'attendance': attendance,
+    })
+
+
+def attendance_take(request):
+    """Bulk take attendance for a given date across all contributors"""
+    if request.method == 'POST':
+        day_str = request.POST.get('date')
+        day = parse_date(day_str) if day_str else dt_date.today()
+        if not day:
+            messages.error(request, 'Invalid date provided.')
+            return redirect('taskassignment:attendance_take')
+
+        # Build map of contributor_id -> is_available from form
+        availability = {}
+        for key, val in request.POST.items():
+            if key.startswith('present_'):
+                try:
+                    contributor_id = int(key.split('_', 1)[1])
+                    availability[contributor_id] = (val == 'on')
+                except Exception:
+                    continue
+
+        # Ensure all contributors are represented; default unchecked to False
+        all_ids = list(Contributor.objects.values_list('id', flat=True))
+        for cid in all_ids:
+            if cid not in availability:
+                availability[cid] = False
+
+        # Save or update records for the date
+        for contributor_id, is_available in availability.items():
+            Attendance.objects.update_or_create(
+                contributor_id=contributor_id,
+                date=day,
+                defaults={'is_available': is_available}
+            )
+
+        messages.success(request, f'Attendance saved for {day}.')
+        return redirect('taskassignment:attendance_list')
+
+    # GET: show form for today's date with all contributors
+    day = dt_date.today()
+    contributors = Contributor.objects.all().order_by('name')
+
+    # Pull existing records to pre-check
+    existing = {a.contributor_id: a.is_available for a in Attendance.objects.filter(date=day)}
+    present_ids = [cid for cid, is_avail in existing.items() if is_avail]
+
+    return render(request, 'taskassignment/attendance_take.html', {
+        'day': day,
+        'contributors': contributors,
+        'existing': existing,
+        'present_ids': present_ids,
+    })

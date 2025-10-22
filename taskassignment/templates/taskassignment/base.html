@@ -54,28 +54,12 @@
                         <i class="bi bi-people mr-2"></i>
                         <span class="font-medium">Contributors</span>
                     </a>
+                    <a href="{% url 'taskassignment:attendance_list' %}" class="flex items-center px-4 py-2 rounded-lg {% if 'attendance' in request.resolver_match.url_name %}bg-primary text-white shadow-sm{% else %}text-gray-600 hover:text-primary hover:bg-gray-50{% endif %} transition-all duration-200">
+                        <i class="bi bi-calendar2-check mr-2"></i>
+                        <span class="font-medium">Attendance</span>
+                    </a>
                 </div>
-                
-                <!-- User Profile -->
-                <div class="flex items-center space-x-3">
-                    <div class="hidden sm:flex items-center space-x-3">
-                        <button class="p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-lg transition-colors">
-                            <i class="bi bi-bell text-lg"></i>
-                        </button>
-                        <button class="p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-lg transition-colors">
-                            <i class="bi bi-gear text-lg"></i>
-                        </button>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <div class="hidden sm:block text-right">
-                            <p class="text-sm font-medium text-black">Admin User</p>
-                            <p class="text-xs text-gray-600">Administrator</p>
-                        </div>
-                        <div class="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center shadow-sm">
-                            <i class="bi bi-person text-sm"></i>
-                        </div>
-                    </div>
-                </div>
+           
             </div>
         </div>
         
@@ -93,6 +77,10 @@
                 <a href="{% url 'taskassignment:contributor_list' %}" class="flex items-center px-3 py-2 rounded-lg {% if 'contributor' in request.resolver_match.url_name %}bg-primary text-white{% else %}text-gray-600 hover:text-primary hover:bg-gray-100{% endif %} transition-colors">
                     <i class="bi bi-people mr-3"></i>
                     <span class="font-medium">Contributors</span>
+                </a>
+                <a href="{% url 'taskassignment:attendance_list' %}" class="flex items-center px-3 py-2 rounded-lg {% if 'attendance' in request.resolver_match.url_name %}bg-primary text-white{% else %}text-gray-600 hover:text-primary hover:bg-gray-100{% endif %} transition-colors">
+                    <i class="bi bi-calendar2-check mr-3"></i>
+                    <span class="font-medium">Attendance</span>
                 </a>
             </div>
         </div>

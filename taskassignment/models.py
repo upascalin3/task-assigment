@@ -24,7 +24,8 @@ class Task(models.Model):
     start = models.DateTimeField()
     is_completed = models.BooleanField(default=False)
     contributor = models.ForeignKey(Contributor, on_delete=models.CASCADE)
-    
+
+
     def clean(self):
         super().clean()
         if self.start and self.end_date:
@@ -41,3 +42,16 @@ class Task(models.Model):
 
     class Meta:
         db_table = "task"
+
+
+class Attendance(models.Model):
+    date = models.DateField(default=date.today)
+    is_available = models.BooleanField(default=False)
+    contributor = models.ForeignKey(Contributor, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.contributor.name} - {self.date} - {'Available' if self.is_available else 'Unavailable'}"
+
+    class Meta:
+        db_table = "attendance"
+        unique_together = ("contributor", "date")
